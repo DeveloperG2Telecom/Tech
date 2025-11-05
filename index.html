@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORIGEM DIGITAL - Topologia da Rede</title>
+    <link rel="icon" type="image/png" href="ORIGEM_icone_semfundo_2.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .header-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .header-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 100%;
+            overflow: visible;
+            position: relative;
+        }
+
+        .topology-map {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-around;
+            gap: 10px;
+            width: 100%;
+            flex-wrap: wrap;
+            overflow: visible;
+            position: relative;
+        }
+
+        .node-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+            min-width: 100px;
+            position: relative;
+        }
+
+        .node {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            min-width: 60px;
+            min-height: 60px;
+            width: 60px;
+            height: 60px;
+        }
+
+        .node:hover {
+            transform: scale(1.1);
+        }
+
+        .node-icon {
+            font-size: 1.8em;
+        }
+        
+        .node-icon i {
+            display: block;
+        }
+
+        .node-label {
+            font-size: 0.75em;
+            color: #333;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .hover-image {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 9999;
+            pointer-events: none;
+            display: block;
+        }
+
+        .node-wrapper:hover .hover-image {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+
+        .arrow {
+            font-size: 1.5em;
+            color: #667eea;
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Cores específicas por tipo */
+        .node-internet {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .node-huawei {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+
+        .node-olt {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+        }
+
+        .node-distribuicao {
+            background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+            color: white;
+        }
+
+        .node-cto {
+            background: linear-gradient(135deg, #48cae4 0%, #023e8a 100%);
+            color: white;
+        }
+
+        .node-onu {
+            background: linear-gradient(135deg, #ffd93d 0%, #6bcf7f 100%);
+            color: white;
+        }
+
+        .node-roteador {
+            background: linear-gradient(135deg, #95e1d3 0%, #f38181 100%);
+            color: white;
+        }
+
+        .conceitos-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .conceitos-title {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .conceitos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .conceito-item {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 12px;
+            border-left: 3px solid #667eea;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .conceito-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: #e9ecef;
+        }
+
+        .conceito-termo {
+            font-size: 0.95em;
+            font-weight: bold;
+            color: #764ba2;
+            margin: 0;
+        }
+
+        .conceito-descricao {
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #667eea;
+        }
+
+        .modal-title {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-right: 40px;
+        }
+
+        .modal-section {
+            margin-bottom: 25px;
+        }
+
+        .modal-section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+
+        .modal-section-content {
+            font-size: 1em;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Layout responsivo */
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+            }
+
+            .header-logo {
+                width: 40px;
+                height: 40px;
+            }
+
+            .header-title {
+                font-size: 1.4em;
+            }
+
+            .topology-map {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+
+            .node-wrapper {
+                min-width: 80px;
+            }
+
+            .node {
+                min-width: 50px;
+                min-height: 50px;
+                width: 50px;
+                height: 50px;
+            }
+
+            .node-icon {
+                font-size: 1.5em;
+            }
+
+            .node-label {
+                font-size: 0.7em;
+            }
+
+            .hover-image {
+                top: calc(100% + 5px);
+                width: 100px;
+                height: 100px;
+            }
+
+            .conceitos-section {
+                padding: 20px;
+            }
+
+            .conceitos-title {
+                font-size: 1.5em;
+            }
+
+            .conceitos-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 10px;
+            }
+
+            .conceito-item {
+                padding: 10px;
+            }
+
+            .conceito-termo {
+                font-size: 0.85em;
+            }
+
+            .modal-content {
+                margin: 20px auto;
+                padding: 20px;
+                width: 95%;
+            }
+
+            .modal-title {
+                font-size: 1.5em;
+            }
+
+            .modal-section-title {
+                font-size: 1.1em;
+            }
+
+            .modal-image {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="ORIGEM_icone_semfundo_2.png" alt="ORIGEM DIGITAL" class="header-logo">
+        <h1 class="header-title">ORIGEM DIGITAL</h1>
+    </div>
+    <div class="container">
+        <div class="topology-map">
+            <!-- Internet -->
+            <div class="node-wrapper">
+                <img src="https://static.vecteezy.com/ti/vetor-gratis/p1/26754079-wi-fi-tecnologia-wi-fi-e-uma-tecnologia-este-transmite-sem-fio-internet-sinais-para-eletronico-dispositivos-para-acesso-a-internet-usava-dentro-entretenimento-e-o-negocio-comunicacao-vetor.jpg" alt="Internet" class="hover-image">
+                <div class="node node-internet">
+                    <div class="node-icon" style="position: relative;">
+                        <i class="fas fa-cloud" style="font-size: 1.2em;"></i>
+                        <i class="fas fa-link" style="font-size: 0.5em; position: absolute; bottom: 2px; right: 2px;"></i>
+                    </div>
+                </div>
+                <div class="node-label">Internet</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <!-- Huawei (Autenticação) -->
+            <div class="node-wrapper">
+                <img src="https://cdn-wcsm.alura.com.br/2025/04/tela-de-login.png" alt="Huawei" class="hover-image">
+                <div class="node node-huawei">
+                    <div class="node-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+                <div class="node-label">Huawei<br>(Autenticação)</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <!-- OLT (Sinal Óptico) -->
+            <div class="node-wrapper">
+                <img src="https://images.tcdn.com.br/img/img_prod/448593/olt_gpon_16pon_v_sol_v1600g2_b_4_portas_rj45_ge_4_portas_sfp_com_16_gbics_27709_1_9b26ec91e29757ee4d7c369a415c923d.jpg" alt="OLT" class="hover-image">
+                <div class="node node-olt">
+                    <div class="node-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                </div>
+                <div class="node-label">OLT<br>(Sinal Óptico)</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <!-- Distribuição -->
+            <div class="node-wrapper">
+                <img src="https://plantec.com/arquivos/produtos/imagens_adicionais/original/FOTO_8a85b29a4dc271b571c8f784897c255e.jpg" alt="Distribuição" class="hover-image">
+                <div class="node node-distribuicao">
+                    <div class="node-icon">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                </div>
+                <div class="node-label">Distribuição</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <!-- Caixa CTO -->
+            <div class="node-wrapper">
+                <img src="https://dcdn-us.mitiendanube.com/stores/629/911/products/caixa-splitter1-2f33095ae2d4eb156a15969053138345-1024-1024.png" alt="CTO" class="hover-image">
+                <div class="node node-cto">
+                    <div class="node-icon">
+                        <i class="fas fa-tower-broadcast"></i>
+                    </div>
+                </div>
+                <div class="node-label">Caixa CTO</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <!-- ONU -->
+            <div class="node-wrapper">
+                <img src="https://m.media-amazon.com/images/I/31ngJ8KNP6L.jpg" alt="ONU" class="hover-image">
+                <div class="node node-onu">
+                    <div class="node-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                </div>
+                <div class="node-label">ONU</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <!-- Roteador -->
+            <div class="node-wrapper">
+                <img src="https://www.fujioka.com.br/arquivos/ids/234659-1000-1000/p_57803_alta_1.png?v=638241842087500000" alt="Roteador" class="hover-image">
+                <div class="node node-roteador">
+                    <div class="node-icon">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                </div>
+                <div class="node-label">Roteador</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="conceitos-section">
+        <h2 class="conceitos-title">Conceitos de Internet</h2>
+        <div class="conceitos-grid">
+            <div class="conceito-item" onclick="abrirModal('ip')">
+                <div class="conceito-termo">IP</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('vlan')">
+                <div class="conceito-termo">VLAN</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('ap')">
+                <div class="conceito-termo">AP</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('ptp')">
+                <div class="conceito-termo">PTP</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('drop')">
+                <div class="conceito-termo">DROP</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('backbone')">
+                <div class="conceito-termo">BACKBONE</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('rompimento')">
+                <div class="conceito-termo">ROMPIMENTO</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('atenuacao')">
+                <div class="conceito-termo">ATENUAÇÃO</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('curto')">
+                <div class="conceito-termo">REDE CABEADA EM CURTO</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('cto')">
+                <div class="conceito-termo">CTO</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('los')">
+                <div class="conceito-termo">LO (LOS)</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('potencia')">
+                <div class="conceito-termo">POTÊNCIA ALTA DA FIBRA</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('dhcp')">
+                <div class="conceito-termo">DHCP</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('ipv4')">
+                <div class="conceito-termo">IPv4</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('ipv6')">
+                <div class="conceito-termo">IPv6</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('dns')">
+                <div class="conceito-termo">DNS</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('http')">
+                <div class="conceito-termo">HTTP</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('https')">
+                <div class="conceito-termo">HTTPS</div>
+            </div>
+            
+            <div class="conceito-item" onclick="abrirModal('ping')">
+                <div class="conceito-termo">PING</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="fecharModal()">&times;</span>
+            <h2 id="modal-title" class="modal-title"></h2>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        const conceitos = {
+            ip: {
+                titulo: "IP (Internet Protocol)",
+                exemplo: "Quando você acessa um site, seu computador tem um IP como 192.168.1.100 e o servidor tem outro como 200.160.2.5. Eles se comunicam usando esses endereços únicos.",
+                comparacao: "IP é como um endereço postal: assim como cada casa tem um endereço único para receber correspondências, cada dispositivo na internet tem um IP único para receber dados.",
+                imagem: "https://www.avast.com/hs-fs/hubfs/New_Avast_Academy/What%20is%20an%20IP%20Address/IP-Addresses.png?width=664&name=IP-Addresses.png"
+            },
+            vlan: {
+                titulo: "VLAN (Virtual LAN)",
+                exemplo: "Em uma empresa, você pode separar a rede em VLANs: VLAN 10 para departamento de vendas, VLAN 20 para TI, VLAN 30 para gestão. Cada grupo fica isolado, mesmo usando a mesma infraestrutura física.",
+                comparacao: "VLAN é como dividir um prédio em apartamentos: todos usam a mesma estrutura física (o prédio), mas cada apartamento é isolado e privado.",
+                imagem: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/VLAN_Concept.svg/1200px-VLAN_Concept.svg.png"
+            },
+            ap: {
+                titulo: "AP (Access Point)",
+                exemplo: "Você tem um roteador no escritório, mas o sinal não chega na sala de reuniões. Instala um Access Point lá que recebe o sinal do roteador principal e cria uma nova rede Wi-Fi naquela área.",
+                comparacao: "AP é como um repetidor de TV: pega o sinal do transmissor principal e retransmite para áreas onde o sinal original não chega bem.",
+                imagem: "https://www.cisco.com/c/dam/en/us/support/docs/wireless/aironet-340-series/66091-1.gif"
+            },
+            ptp: {
+                titulo: "PTP (Point to Point)",
+                exemplo: "Uma empresa tem dois prédios separados por 5km e precisa conectar as redes. Usa uma conexão PTP com antenas direcionais que criam um link dedicado entre os dois pontos.",
+                comparacao: "PTP é como uma linha telefônica privada: uma conexão direta e exclusiva entre dois pontos, sem compartilhar com outros.",
+                imagem: "https://www.apcsolutionsuk.com/wp-content/uploads/2021/11/Point-To-Point-Network-Diagram.jpg"
+            },
+            drop: {
+                titulo: "DROP",
+                exemplo: "A fibra óptica chega até a CTO na rua. Dali, sai um cabo drop que vai direto até a parede da sua casa, conectando seu serviço de internet.",
+                comparacao: "DROP é como o ramal de água que sai da rua e entra na sua casa: é a conexão final que leva o serviço até você.",
+                imagem: "https://backend.intelbras.com/sites/default/files/2024-04/cabo-drop-1km-colado-cabo-drop_0.png"
+            },
+            backbone: {
+                titulo: "BACKBONE",
+                exemplo: "Os grandes provedores de internet se conectam a backbones que atravessam estados e países. Quando você acessa um site em outro país, seus dados passam por esses backbones.",
+                comparacao: "BACKBONE é como as rodovias principais: assim como as estradas conectam cidades, os backbones conectam redes grandes e transportam o tráfego principal da internet.",
+                imagem: "https://a3aengenharia.com.br/wp-content/uploads/2022/04/backbone-em-fibra-1-1024x576.png"
+            },
+            rompimento: {
+                titulo: "ROMPIMENTO",
+                exemplo: "Durante uma obra, uma escavadeira quebra acidentalmente o cabo de fibra óptica. Imediatamente, todos os clientes conectados àquela fibra perdem o serviço de internet.",
+                comparacao: "ROMPIMENTO é como cortar um fio elétrico: quando a fibra se rompe, o sinal não consegue mais passar, interrompendo completamente a comunicação.",
+                imagem: "https://www.mikweb.com.br/wp-content/uploads/2023/11/rompimento-de-fibra-optica.webp"
+            },
+            atenuacao: {
+                titulo: "ATENUAÇÃO",
+                exemplo: "Uma fibra de 10km pode perder -15dB de sinal. Se a perda for muito alta (ex: -25dB), a ONU não consegue interpretar o sinal corretamente e a conexão falha.",
+                comparacao: "ATENUAÇÃO é como o volume de uma música: quanto mais longe você está da fonte, mais baixo fica o som. Na fibra, quanto mais longe, mais fraco o sinal.",
+                imagem: "https://www.thefoa.org/PORT/Chapter%208_PT.fld/image012.jpg"
+            },
+            curto: {
+                titulo: "REDE CABEADA EM CURTO",
+                exemplo: "Um cabo de rede Ethernet está danificado internamente, causando um curto entre os fios. Quando você tenta conectar um computador, ele não consegue obter IP nem acessar a internet.",
+                comparacao: "REDE CABEADA EM CURTO é como um fio elétrico com curto: o circuito fica fechado incorretamente, impedindo o funcionamento normal do equipamento.",
+                imagem: "https://neofeed.com.br/wp-content/uploads/2024/08/curto-circuito-1200x900.jpg"
+            },
+            cto: {
+                titulo: "CTO (Caixa Terminal Óptica)",
+                exemplo: "Na esquina da sua rua tem uma caixa CTO. Dentro dela, uma fibra principal é dividida em várias fibras menores que vão para cada casa da região.",
+                comparacao: "CTO é como uma caixa de distribuição de energia elétrica: pega a linha principal e divide para várias residências.",
+                imagem: "https://i.imgur.com/lW8Dec2.jpg"
+            },
+            los: {
+                titulo: "LOS (Loss of Signal)",
+                exemplo: "Quando você verifica a ONU e aparece 'LOS' no display, significa que não há sinal óptico chegando. Pode ser por rompimento da fibra ou desconexão em algum ponto.",
+                comparacao: "LOS é como perder o sinal de TV: você vê 'sem sinal' na tela porque não há transmissão chegando ao aparelho.",
+                imagem: "https://http2.mlstatic.com/D_NQ_NP_826488-MLU73701650661_122023-F.jpg"
+            },
+            potencia: {
+                titulo: "POTÊNCIA ALTA DA FIBRA",
+                exemplo: "Uma ONU deve receber sinal entre -8dBm e -27dBm. Se receber -3dBm (potência muito alta), pode queimar o receptor óptico da ONU, danificando o equipamento.",
+                comparacao: "POTÊNCIA ALTA é como conectar um aparelho de 110V em uma tomada de 220V: o excesso de energia danifica o equipamento.",
+                imagem: "https://m.media-amazon.com/images/I/719RfTkcyiL.jpg"
+            },
+            dhcp: {
+                titulo: "DHCP (Dynamic Host Configuration Protocol)",
+                exemplo: "Quando você conecta seu celular ao Wi-Fi, o roteador automaticamente atribui um IP como 192.168.1.105 para seu celular. Você não precisa configurar nada manualmente.",
+                comparacao: "DHCP é como um recepcionista que atribui números aos clientes: quando você chega, recebe um número automaticamente, sem precisar escolher.",
+                imagem: "https://s2-techtudo.glbimg.com/MN2Q-BizPb25_5qJB-KOWp_UB08=/0x0:695x272/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_08fbf48bc0524877943fe86e43087e7a/internal_photos/bs/2021/K/h/HpjyLBQnqWG9AAh0bsGw/2014-10-30-dhcp.png"
+            },
+            ipv4: {
+                titulo: "IPv4",
+                exemplo: "Seu computador pode ter o IP 192.168.1.50. Esse formato de 4 números separados por pontos é IPv4. Existem cerca de 4 bilhões de endereços IPv4 possíveis.",
+                comparacao: "IPv4 é como um sistema de telefones antigo: limitado a 4 bilhões de números, já está quase esgotado, como aconteceu com os números de telefone.",
+                imagem: "https://www.dreamhost.com/blog/wp-content/uploads/2024/07/01_ipv4_address_in_dotted_decimal_notation.webp"
+            },
+            ipv6: {
+                titulo: "IPv6",
+                exemplo: "Um endereço IPv6 é assim: 2001:0db8:85a3:0000:0000:8a2e:0370:7334. Muito mais longo que IPv4, permite trilhões de trilhões de endereços únicos.",
+                comparacao: "IPv6 é como expandir o sistema de telefones: ao invés de 4 bilhões, agora temos números suficientes para cada grão de areia na Terra ter seu próprio IP.",
+                imagem: "https://www.dreamhost.com/blog/wp-content/uploads/2024/07/02_ipv6_address_.webp"
+            },
+            dns: {
+                titulo: "DNS (Domain Name System)",
+                exemplo: "Você digita 'google.com' no navegador. O DNS traduz esse nome para o IP 172.217.29.14, permitindo que seu computador encontre o servidor do Google na internet.",
+                comparacao: "DNS é como uma agenda telefônica: você sabe o nome da pessoa (google.com), mas precisa do número (IP) para ligar. O DNS faz essa tradução.",
+                imagem: "https://academy.bit2me.com/wp-content/uploads/2019/05/49_DNS.png"
+            },
+            http: {
+                titulo: "HTTP (HyperText Transfer Protocol)",
+                exemplo: "Quando você acessa um site sem HTTPS, os dados trafegam em texto puro. Se alguém interceptar, pode ver suas senhas e informações pessoais.",
+                comparacao: "HTTP é como enviar um cartão postal: qualquer pessoa que pegue o cartão pode ler a mensagem. Não há privacidade.",
+                imagem: "https://cdn.melhoreshospedagem.com/wp/wp-content/uploads/2025/01/como-funciona-http.jpg"
+            },
+            https: {
+                titulo: "HTTPS (HTTP Secure)",
+                exemplo: "Quando você acessa seu banco online, o site usa HTTPS. Mesmo que alguém intercepte os dados, eles estão criptografados e não podem ser lidos.",
+                comparacao: "HTTPS é como enviar uma carta em um envelope lacrado: só quem tem a chave (o servidor) pode abrir e ler o conteúdo.",
+                imagem: "https://tech.4u.pt/wp-content/uploads/2018/12/https.png"
+            },
+            ping: {
+                titulo: "PING",
+                exemplo: "Você executa 'ping google.com' no terminal. O comando envia 4 pacotes e recebe respostas em 15ms, 16ms, 14ms, 15ms. Isso confirma que a conexão está funcionando.",
+                comparacao: "PING é como um sonar: você envia um sinal e mede quanto tempo leva para voltar. Se voltar rápido, a conexão está boa.",
+                imagem: "https://suporte.topdata.com.br/wp-content/uploads/Ping-Ok-1.png"
+            }
+        };
+
+        function abrirModal(conceitoId) {
+            const conceito = conceitos[conceitoId];
+            if (!conceito) return;
+
+            document.getElementById('modal-title').textContent = conceito.titulo;
+            
+            const modalBody = document.getElementById('modal-body');
+            modalBody.innerHTML = `
+                <div class="modal-section">
+                    <div class="modal-section-title">📋 Exemplo Prático</div>
+                    <div class="modal-section-content">${conceito.exemplo}</div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="modal-section-title">🔄 Comparação</div>
+                    <div class="modal-section-content">${conceito.comparacao}</div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="modal-section-title">🖼️ Imagem Ilustrativa</div>
+                    <img src="${conceito.imagem}" alt="${conceito.titulo}" class="modal-image" onerror="this.src='https://via.placeholder.com/500x300?text=Imagem+Indisponivel'">
+                </div>
+            `;
+            
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function fecharModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target == modal) {
+                fecharModal();
+            }
+        }
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                fecharModal();
+            }
+        });
+    </script>
+</body>
+</html>
